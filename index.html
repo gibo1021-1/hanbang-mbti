@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="질문 12개, 1분이면 끝! 한약사가 만든 한방 생활 유형 테스트로 내 몸에 맞는 차와 생활 습관을 알아보세요.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="나의 한방 건강 유형 테스트">
+<meta property="og:description" content="내 몸은 어느 서랍에 들어갈까? 1분 테스트로 맞춤 한방차와 생활 처방 받기">
+<meta property="og:locale" content="ko_KR">
+<meta name="theme-color" content="#3e6b4f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%233e6b4f'/%3E%3Ctext x='32' y='44' font-size='34' text-anchor='middle' fill='white' font-family='serif'%3E%E8%97%A5%3C/text%3E%3C/svg%3E">
+<title>나의 한방 건강 유형</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=Noto+Serif+KR:wght@700;900&display=swap">
+<style>
+/* Layout: 약장(한약 서랍장) 모티프 — 한 화면에 한 장씩 넘기는 카드, 결과는 서랍 라벨과 寒熱·虛實 눈금 */
+:root{
+  --paper:#f3f4ef;      /* 약봉지 종이, 쑥빛이 살짝 도는 흰색 */
+  --sheet:#ffffff;
+  --ink:#1f2a24;        /* 먹색 */
+  --muted:#5d6b62;
+  --line:#d5dbd2;
+  --mugwort:#3e6b4f;    /* 쑥색 — 주 강조 */
+  --mugwort-soft:#e3ece4;
+  --seal:#b8352a;       /* 낙관 주사색 — 도장에만 */
+  --cold:#3c6b8f; --hot:#c0612b;
+  --f-display:"Noto Serif KR","Gowun Batang",serif;
+  --f-serif:"Gowun Batang","Noto Serif KR",serif;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#141a16;--sheet:#1c2420;--ink:#e6ebe5;--muted:#9eaba2;--line:#2f3a33;
+  --mugwort:#8cbf9b;--mugwort-soft:#24332a;--seal:#e0685b;--cold:#7fb2d9;--hot:#eb9a62;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#141a16;--sheet:#1c2420;--ink:#e6ebe5;--muted:#9eaba2;--line:#2f3a33;
+  --mugwort:#8cbf9b;--mugwort-soft:#24332a;--seal:#e0685b;--cold:#7fb2d9;--hot:#eb9a62;color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.65;padding-inline:16px;padding-block:28px 48px}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{text-wrap:balance;margin:0}
+p{margin:0}
+.eyebrow{font-size:12px;letter-spacing:.14em;color:var(--mugwort);font-weight:600}
+.sheet{background:var(--sheet);border:1px solid var(--line);border-radius:6px;padding:24px 22px}
+button{font:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:3px solid var(--mugwort);outline-offset:2px}
+
+/* intro */
+.intro-head{display:flex;flex-direction:column;gap:12px}
+.intro-head h1{font-family:var(--f-display);font-weight:900;font-size:clamp(30px,8vw,42px);line-height:1.2;letter-spacing:-.01em}
+.intro-head h1 em{font-style:normal;color:var(--mugwort)}
+.lede{color:var(--muted);max-width:34em}
+.drawers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:8px;background:var(--mugwort-soft);border-radius:6px}
+.drawer{background:var(--sheet);border:1px solid var(--line);border-radius:3px;padding:14px 12px 12px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;text-decoration:none;color:inherit;position:relative}
+.drawer::after{content:"";width:22px;height:5px;border-radius:3px;background:var(--line);margin-top:6px}
+.drawer .hz{font-family:var(--f-display);font-size:22px;font-weight:700;letter-spacing:.08em}
+.drawer .nm{font-size:13px;color:var(--muted)}
+.start{display:flex;flex-direction:column;gap:10px}
+.btn{border:0;border-radius:4px;padding:15px 18px;font-weight:600;font-size:16px}
+.btn-primary{background:var(--mugwort);color:var(--sheet)}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.meta{font-size:13px;color:var(--muted)}
+
+/* quiz */
+.progress{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{flex:1;height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.bar span{display:block;height:100%;background:var(--mugwort);transition:width .3s}
+.q{font-family:var(--f-serif);font-weight:700;font-size:clamp(21px,5.4vw,26px);line-height:1.45;min-height:3em}
+.opts{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+.opt{text-align:left;background:var(--sheet);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:15px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;transition:border-color .15s,background .15s}
+.opt:hover{border-color:var(--mugwort);background:var(--mugwort-soft)}
+.opt b{font-weight:500}
+.opt small{color:var(--muted);font-size:12px}
+.homebar{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid var(--line);padding-bottom:12px}
+.homebar .brand{font-family:var(--f-display);font-weight:700;font-size:15px;letter-spacing:.04em;color:var(--muted)}
+.home{background:var(--sheet);border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:7px 14px;font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:6px}
+.home:hover{border-color:var(--mugwort);color:var(--mugwort)}
+.back{align-self:flex-start;background:none;border:0;color:var(--muted);font-size:14px;padding:4px 0}
+
+/* result */
+.result-card{position:relative;overflow:hidden}
+.stamp{position:absolute;top:18px;right:18px;width:62px;height:62px;border:2.5px solid var(--seal);color:var(--seal);border-radius:4px;display:grid;place-items:center;font-family:var(--f-display);font-weight:900;font-size:15px;line-height:1.1;text-align:center;transform:rotate(-6deg);opacity:.9}
+.r-hanja{font-family:var(--f-display);font-weight:900;font-size:clamp(40px,12vw,58px);letter-spacing:.12em;line-height:1;color:var(--mugwort)}
+.r-name{font-family:var(--f-serif);font-weight:700;font-size:clamp(24px,6.4vw,30px);margin-top:10px;padding-right:72px}
+.r-one{color:var(--muted);margin-top:6px}
+.scales{display:flex;flex-direction:column;gap:14px;margin-top:22px}
+.scale{display:grid;grid-template-columns:2.2em 1fr 2.2em;align-items:center;gap:10px;font-family:var(--f-display);font-size:18px}
+.scale .l{text-align:right}
+.track{position:relative;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--cold),var(--line) 50%,var(--hot))}
+.track.xs{background:linear-gradient(90deg,var(--muted),var(--line) 50%,var(--mugwort))}
+.tick{position:absolute;left:50%;top:-4px;width:1px;height:16px;background:var(--muted);opacity:.5}
+.dot{position:absolute;top:50%;width:18px;height:18px;border-radius:50%;background:var(--sheet);border:3px solid var(--ink);transform:translate(-50%,-50%);transition:left .6s}
+.scale-cap{font-family:var(--f-body);font-size:12px;color:var(--muted);display:flex;justify-content:space-between;margin-top:-8px;padding-inline:3.2em}
+.section{display:flex;flex-direction:column;gap:12px}
+.section h3{font-family:var(--f-serif);font-size:19px}
+.signs{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:4px}
+.labels{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.label{border:1px solid var(--line);border-radius:3px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;background:var(--sheet);min-width:0}
+.label .hz{font-family:var(--f-display);font-size:20px;font-weight:700;letter-spacing:.06em}
+.label .ko{font-weight:600;font-size:14px}
+.label .how{font-size:13px;color:var(--muted)}
+.tips{display:flex;flex-direction:column;gap:8px}
+.tip{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:baseline}
+.tip .k{font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.k.do{background:var(--mugwort-soft);color:var(--mugwort)}
+.k.dont{background:color-mix(in srgb,var(--seal) 14%,transparent);color:var(--seal)}
+.caution{border-left:3px solid var(--seal);padding:4px 0 4px 14px;display:flex;flex-direction:column;gap:8px}
+.caution p{font-size:15px}
+.cta{background:var(--ink);color:var(--paper);border-radius:6px;padding:22px;display:flex;flex-direction:column;gap:12px}
+.cta h3{font-family:var(--f-serif);font-size:20px}
+.cta p{opacity:.8;font-size:15px}
+.cta a{background:var(--paper);color:var(--ink);text-decoration:none;font-weight:600;border-radius:4px;padding:13px 16px;text-align:center}
+.share{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.toast{font-size:13px;color:var(--mugwort);min-height:1.4em;text-align:center}
+.disclaim{font-size:12.5px;color:var(--muted);line-height:1.6;border-top:1px solid var(--line);padding-top:16px}
+.others{display:flex;flex-wrap:wrap;gap:8px}
+.others a{font-size:14px;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:6px 12px;text-decoration:none}
+.fade{animation:fade .35s ease}
+@keyframes fade{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.fade{animation:none}.dot,.bar span{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap" id="app">
+  <div class="homebar" id="homeBar" hidden>
+    <span class="brand">한방 건강 유형</span>
+    <button class="home" id="homeBtn" aria-label="홈 화면으로 돌아가기">⌂ 처음으로</button>
+  </div>
+  <!-- 첫 화면 -->
+  <section id="intro" class="wrap" style="padding:0">
+    <div class="intro-head">
+      <span class="eyebrow">한약사가 만든 1분 생활 유형 테스트</span>
+      <h1>내 몸은 <em>어느 서랍</em>에 들어갈까?</h1>
+      <p class="lede">질문 12개로 내 몸이 찬 쪽인지 더운 쪽인지, 기운이 모자란 쪽인지 막힌 쪽인지 알아보고, 나에게 맞는 차와 생활 습관을 받아보세요.</p>
+    </div>
+    <nav class="drawers" aria-label="네 가지 유형">
+      <a class="drawer" href="#gaon"><span class="hz">寒虛</span><span class="nm">웅크린 화로형</span></a>
+      <a class="drawer" href="#jeong"><span class="hz">寒滯</span><span class="nm">고인 연못형</span></a>
+      <a class="drawer" href="#maru"><span class="hz">熱虛</span><span class="nm">마른 잎형</span></a>
+      <a class="drawer" href="#kkeul"><span class="hz">熱實</span><span class="nm">끓는 주전자형</span></a>
+    </nav>
+    <div class="start">
+      <button class="btn btn-primary" id="startBtn">테스트 시작하기</button>
+      <p class="meta">질문 12개 · 약 1분 · 결과는 저장되지 않아요</p>
+    </div>
+  </section>
+
+  <!-- 질문 -->
+  <section id="quiz" class="wrap" style="padding:0" hidden>
+    <div class="progress"><span id="pnum">1 / 12</span><div class="bar"><span id="pbar" style="width:0"></span></div></div>
+    <div class="sheet fade" id="qbox">
+      <p class="eyebrow" id="qaxis">寒熱</p>
+      <h2 class="q" id="qtext"></h2>
+      <div class="opts" id="opts"></div>
+    </div>
+    <button class="back" id="backBtn">← 이전 질문</button>
+  </section>
+
+  <!-- 결과 -->
+  <section id="result" class="wrap" style="padding:0" hidden></section>
+</div>
+
+<script>
+const THREADS = "https://www.threads.net/@gibo1021";
+
+/* dir: 寒熱 축은 +면 熱, 虛實 축은 +면 實(막힘·넘침) */
+const QUESTIONS = [
+  {axis:"ht", dir:-1, t:"손발이 차서 겨울엔 양말을 신고 자요"},
+  {axis:"xs", dir:-1, t:"오후만 되면 기운이 쭉 빠져요"},
+  {axis:"ht", dir: 1, t:"얼굴이나 상체로 열이 잘 올라요"},
+  {axis:"xs", dir: 1, t:"아침에 얼굴이나 손이 잘 부어요"},
+  {axis:"ht", dir:-1, t:"찬 음료보다 따뜻한 물이 편해요"},
+  {axis:"xs", dir:-1, t:"말을 오래 하면 목소리가 작아지고 지쳐요"},
+  {axis:"ht", dir: 1, t:"추위보다 더위를 더 못 참아요"},
+  {axis:"xs", dir: 1, t:"스트레스를 받으면 가슴이 답답하고 욱해요"},
+  {axis:"ht", dir:-1, t:"배가 차가워지면 금방 설사를 해요"},
+  {axis:"xs", dir:-1, t:"조금만 먹어도 배가 부르고 입맛이 없어요"},
+  {axis:"ht", dir: 1, t:"입이 마르고 시원한 물이 자주 당겨요"},
+  {axis:"xs", dir: 1, t:"몸이 무겁고 변을 봐도 개운하지 않아요"},
+];
+const OPTIONS = [
+  {v:2, b:"자주 그래요", s:"거의 매일"},
+  {v:1, b:"가끔 그래요", s:"일주일에 한두 번"},
+  {v:0, b:"별로 아니에요", s:"거의 없음"},
+];
+
+const TYPES = {
+  gaon:{hz:"寒虛", name:"웅크린 화로형", one:"불씨는 있는데 장작이 모자란 몸",
+    stamp:"溫補",
+    desc:"몸을 데우는 힘이 약해서 손발과 배가 쉽게 차가워지고, 기운도 금방 바닥나는 유형이에요. 찬 음식에 특히 민감해요.",
+    signs:["손발·아랫배가 차고 추위를 많이 탐","찬 것을 먹으면 소화가 더디거나 설사","오후가 되면 쉽게 지침"],
+    teas:[{hz:"生薑",ko:"생강차",how:"얇게 저며 10분 끓이기"},{hz:"大棗",ko:"대추차",how:"씨를 빼고 은근히 달이기"},{hz:"桂皮",ko:"계피차",how:"한 조각이면 충분"}],
+    dos:["아침 첫 물은 미지근하게","배와 발목을 따뜻하게 덮기","가벼운 걷기로 몸 데우기"],
+    donts:["얼음 음료·찬 과일 몰아 먹기","공복에 오래 굶기"],
+    caution:["생강·계피는 혈액 응고를 늦출 수 있어요. 와파린 같은 항응고제나 아스피린을 드신다면 진하게 매일 드시기 전에 약사와 상의하세요.","대추차에 감초를 함께 넣은 제품이 많아요. 혈압약·이뇨제를 드시면 감초가 든 차는 오래 드시지 않는 게 좋아요."]},
+  jeong:{hz:"寒滯", name:"고인 연못형", one:"물이 잘 돌지 않아 무거운 몸",
+    stamp:"利濕",
+    desc:"몸속 수분이 잘 순환되지 않아 붓고 무거운 느낌이 드는 유형이에요. 한방에서는 습(濕)이 쌓였다고 표현해요.",
+    signs:["아침에 붓고 오후에 다리가 무거움","비 오는 날 몸이 더 처짐","식후에 더부룩하고 졸림"],
+    teas:[{hz:"陳皮",ko:"진피차(귤껍질)",how:"말린 껍질 한 줌을 우리기"},{hz:"薏苡仁",ko:"율무차",how:"볶은 율무를 끓여 마시기"},{hz:"玉米鬚",ko:"옥수수수염차",how:"보리차 대신 물처럼"}],
+    dos:["짠 국물은 건더기 위주로","땀이 살짝 날 정도의 운동","저녁은 일찍, 가볍게"],
+    donts:["밀가루·단 음료 자주 먹기","오래 앉아 있기"],
+    caution:["율무는 임신 중에는 피하는 게 좋다고 알려져 있어요.","이뇨제나 혈압약을 드신다면 옥수수수염차처럼 소변을 늘리는 차를 많이 마시기 전에 상담하세요."]},
+  maru:{hz:"熱虛", name:"마른 잎형", one:"촉촉함이 부족해 쉽게 달아오르는 몸",
+    stamp:"滋陰",
+    desc:"몸을 식혀 주는 진액이 부족해서 열이 나기보다는 화끈거리고 건조한 유형이에요. 밤에 더 달아오르고, 피곤해도 잠이 얕아요.",
+    signs:["손발바닥이 화끈하고 입·눈이 건조","밤에 더 덥고 잠이 얕음","피곤한데 쉬어도 개운하지 않음"],
+    teas:[{hz:"枸杞子",ko:"구기자차",how:"한 스푼을 뜨거운 물에 우리기"},{hz:"五味子",ko:"오미자차",how:"찬물에 하룻밤 우리기"},{hz:"麥門冬",ko:"맥문동차",how:"보리차처럼 달이기"}],
+    dos:["밤 11시 전에 잠들기","물은 조금씩 자주","오이·배처럼 수분 많은 음식"],
+    donts:["매운 음식과 늦은 밤 음주","사우나에서 오래 땀 빼기"],
+    caution:["구기자는 와파린과 함께 먹었을 때 출혈 위험이 커진 사례가 보고돼 있어요. 항응고제를 드신다면 꼭 먼저 상담하세요.","오미자는 신맛이 강해 위염·역류가 있으면 연하게 드세요."]},
+  kkeul:{hz:"熱實", name:"끓는 주전자형", one:"열이 위로 차올라 김이 나는 몸",
+    stamp:"淸熱",
+    desc:"에너지는 넘치는데 열이 위로 몰려 얼굴이 붉어지고 쉽게 욱하는 유형이에요. 스트레스가 쌓이면 두통이나 뒷목 뻐근함으로 나타나기도 해요.",
+    signs:["얼굴이 쉽게 붉어지고 더위에 약함","스트레스에 예민하고 욱함","변비나 입냄새가 생기기 쉬움"],
+    teas:[{hz:"菊花",ko:"국화차",how:"꽃 3~4송이를 우리기"},{hz:"決明子",ko:"결명자차",how:"볶은 씨앗을 가볍게 달이기"},{hz:"薄荷",ko:"박하차",how:"오후에 한 잔"}],
+    dos:["화가 날 땐 5분 걷기","잎채소와 제철 과일 챙기기","잠들기 전 화면 끄기"],
+    donts:["술·튀김·매운 음식 몰아 먹기","잠 줄이고 커피로 버티기"],
+    caution:["국화차는 국화과(쑥·돼지풀 등) 알레르기가 있으면 피하세요.","결명자는 장을 자극해 오래 진하게 마시면 설사할 수 있어요. 변비약을 함께 드신다면 양을 줄이세요."]},
+};
+
+let idx=0, answers=[];
+const $=id=>document.getElementById(id);
+const show=id=>{["intro","quiz","result"].forEach(s=>$(s).hidden=(s!==id));$("homeBar").hidden=(id==="intro");};
+function goHome(){
+  idx=0;answers=[];
+  try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}
+  show("intro");window.scrollTo({top:0});
+}
+
+function renderQ(){
+  const q=QUESTIONS[idx];
+  $("pnum").textContent=`${idx+1} / ${QUESTIONS.length}`;
+  $("pbar").style.width=`${(idx/QUESTIONS.length)*100}%`;
+  $("qaxis").textContent=q.axis==="ht"?"寒熱 · 찬가 더운가":"虛實 · 모자란가 막혔나";
+  $("qtext").textContent=q.t;
+  $("opts").innerHTML="";
+  OPTIONS.forEach(o=>{
+    const b=document.createElement("button");
+    b.className="opt";
+    b.innerHTML=`<b>${o.b}</b><small>${o.s}</small>`;
+    b.onclick=()=>{answers[idx]=o.v;idx++;idx<QUESTIONS.length?renderQ():finish();};
+    $("opts").appendChild(b);
+  });
+  $("backBtn").style.visibility=idx>0?"visible":"hidden";
+  const box=$("qbox");box.classList.remove("fade");void box.offsetWidth;box.classList.add("fade");
+}
+
+function finish(){
+  let ht=0,xs=0;
+  QUESTIONS.forEach((q,i)=>{const v=(answers[i]||0)*q.dir;q.axis==="ht"?ht+=v:xs+=v;});
+  // 각 축 범위 -6 ~ +6, 동점이면 더 흔한 쪽(寒/虛)으로
+  const key = ht>0 ? (xs>0?"kkeul":"maru") : (xs>0?"jeong":"gaon");
+  renderResult(key,ht,xs,true);
+}
+
+function pct(v){return 50+(v/6)*44;}
+
+function renderResult(key,ht,xs,fromQuiz){
+  const T=TYPES[key];
+  if(ht===undefined){ // 링크로 바로 들어온 경우: 유형 중심값
+    ht={gaon:-3,jeong:-3,maru:3,kkeul:3}[key];
+    xs={gaon:-3,jeong:3,maru:-3,kkeul:3}[key];
+  }
+  const others=Object.entries(TYPES).filter(([k])=>k!==key)
+    .map(([k,t])=>`<a href="#${k}">${t.hz} ${t.name}</a>`).join("");
+  $("result").innerHTML=`
+    <span class="eyebrow">${fromQuiz?"테스트 결과":"유형 미리보기"}</span>
+    <article class="sheet result-card fade">
+      <div class="stamp" aria-hidden="true">${T.stamp.split("").join("<br>")}</div>
+      <div class="r-hanja">${T.hz}</div>
+      <h2 class="r-name">${T.name}</h2>
+      <p class="r-one">${T.one}</p>
+      <div class="scales" aria-label="유형 눈금">
+        <div class="scale"><span class="l">寒</span><div class="track"><i class="tick"></i><span class="dot" style="left:${pct(ht)}%"></span></div><span>熱</span></div>
+        <div class="scale-cap"><span>차가운 쪽</span><span>더운 쪽</span></div>
+        <div class="scale"><span class="l">虛</span><div class="track xs"><i class="tick"></i><span class="dot" style="left:${pct(xs)}%"></span></div><span>實</span></div>
+        <div class="scale-cap"><span>모자란 쪽</span><span>막힌 쪽</span></div>
+      </div>
+    </article>
+    <div class="section"><p>${T.desc}</p>
+      <ul class="signs">${T.signs.map(s=>`<li>${s}</li>`).join("")}</ul></div>
+    <div class="section"><h3>나에게 맞는 차</h3>
+      <div class="labels">${T.teas.map(t=>`<div class="label"><span class="hz">${t.hz}</span><span class="ko">${t.ko}</span><span class="how">${t.how}</span></div>`).join("")}</div></div>
+    <div class="section"><h3>생활 처방</h3><div class="tips">
+      ${T.dos.map(d=>`<div class="tip"><span class="k do">하면 좋아요</span><span>${d}</span></div>`).join("")}
+      ${T.donts.map(d=>`<div class="tip"><span class="k dont">줄여 보세요</span><span>${d}</span></div>`).join("")}
+    </div></div>
+    <div class="section"><h3>같이 먹을 때 주의하세요</h3>
+      <div class="caution">${T.caution.map(c=>`<p>${c}</p>`).join("")}</div></div>
+    <div class="cta"><h3>${T.name}에게 맞는 팁, 매일 받아보세요</h3>
+      <p>한약사가 매일 아침 한방차·생활 습관·약 궁합 이야기를 올려요.</p>
+      <a href="${THREADS}" target="_blank" rel="noopener">스레드 @gibo1021 팔로우하기</a></div>
+    <div class="share">
+      <button class="btn btn-primary" id="imgBtn" style="grid-column:1/-1">결과 카드 이미지 저장</button>
+      <button class="btn btn-ghost" id="copyBtn">결과 링크 복사</button>
+      <button class="btn btn-ghost" id="retryBtn">${fromQuiz?"다시 하기":"나도 테스트하기"}</button>
+    </div>
+    <p class="toast" id="toast" role="status">카드 이미지를 저장해서 스토리에 올려 보세요</p>
+    <div class="section"><h3>다른 유형도 보기</h3><div class="others">${others}</div></div>
+    <p class="disclaim">이 테스트는 생활 습관을 돌아보기 위한 재미용 콘텐츠이며 체질 진단이나 치료를 대신하지 않아요. 복용 중인 약이 있거나 증상이 계속되면 한약사·약사·한의사와 상담하세요.</p>`;
+  show("result");
+  window.scrollTo({top:0});
+  $("imgBtn").onclick=()=>saveCard(key);
+  $("copyBtn").onclick=()=>{
+    const url=location.origin+location.pathname+"#"+key;
+    const text=`나의 한방 건강 유형은 ${T.hz} '${T.name}' — ${T.one}. 너는 어떤 유형이야? 1분 테스트 👉 ${url}`;
+    const done=()=>$("toast").textContent="복사했어요. 카톡이나 스레드에 붙여넣어 보세요";
+    try{navigator.clipboard.writeText(text).then(done).catch(()=>{$("toast").textContent=text;});}
+    catch(e){$("toast").textContent=text;}
+  };
+  $("retryBtn").onclick=start;
+}
+
+/* 결과 카드 이미지 (1080x1350, 인스타·스레드 세로 비율) */
+async function saveCard(key){
+  const T=TYPES[key], W=1080, H=1350;
+  const c=document.createElement("canvas");c.width=W;c.height=H;
+  const g=c.getContext("2d");
+  try{await document.fonts.ready;}catch(e){}
+  const serif='"Noto Serif KR","Gowun Batang",serif', sans='"IBM Plex Sans KR","Apple SD Gothic Neo",sans-serif';
+  g.fillStyle="#f3f4ef";g.fillRect(0,0,W,H);
+  g.fillStyle="#ffffff";g.strokeStyle="#d5dbd2";g.lineWidth=3;
+  g.fillRect(70,70,W-140,H-140);g.strokeRect(70,70,W-140,H-140);
+  g.fillStyle="#3e6b4f";g.font=`600 34px ${sans}`;g.fillText("나의 한방 건강 유형",130,170);
+  // 낙관
+  g.save();g.translate(860,200);g.rotate(-0.1);g.strokeStyle="#b8352a";g.lineWidth=7;g.strokeRect(-70,-70,140,140);
+  g.fillStyle="#b8352a";g.font=`900 50px ${serif}`;g.textAlign="center";g.fillText(T.stamp[0],0,-6);g.fillText(T.stamp[1],0,52);g.restore();
+  g.fillStyle="#3e6b4f";g.font=`900 170px ${serif}`;g.fillText(T.hz,124,430);
+  g.fillStyle="#1f2a24";g.font=`700 76px ${serif}`;g.fillText(T.name,130,560);
+  g.fillStyle="#5d6b62";g.font=`400 40px ${sans}`;g.fillText(T.one,130,630);
+  // 눈금
+  const ht={gaon:-3,jeong:-3,maru:3,kkeul:3}[key], xs={gaon:-3,jeong:3,maru:-3,kkeul:3}[key];
+  const scale=(y,a,b,v,c1,c2)=>{
+    g.fillStyle="#1f2a24";g.font=`700 44px ${serif}`;g.textAlign="right";g.fillText(a,200,y+15);g.textAlign="left";g.fillText(b,880,y+15);
+    const gr=g.createLinearGradient(230,0,850,0);gr.addColorStop(0,c1);gr.addColorStop(.5,"#d5dbd2");gr.addColorStop(1,c2);
+    g.fillStyle=gr;g.fillRect(230,y-7,620,14);
+    const x=230+620*(0.5+v/12*0.88);g.beginPath();g.arc(x,y,20,0,7);g.fillStyle="#fff";g.fill();g.lineWidth=7;g.strokeStyle="#1f2a24";g.stroke();
+  };
+  scale(740,"寒","熱",ht,"#3c6b8f","#c0612b");
+  scale(840,"虛","實",xs,"#5d6b62","#3e6b4f");
+  // 추천 차
+  g.fillStyle="#1f2a24";g.font=`700 40px ${serif}`;g.fillText("나에게 맞는 차",130,965);
+  T.teas.forEach((t,i)=>{
+    const x=130+i*280;g.strokeStyle="#d5dbd2";g.lineWidth=3;g.strokeRect(x,995,250,130);
+    g.fillStyle="#1f2a24";g.font=`700 44px ${serif}`;g.fillText(t.hz,x+24,1055);
+    g.fillStyle="#5d6b62";g.font=`500 28px ${sans}`;g.fillText(t.ko.replace(/\(.*\)/,""),x+24,1100);
+  });
+  g.fillStyle="#3e6b4f";g.font=`600 32px ${sans}`;g.fillText("한약사 @gibo1021 · 재미로 보는 생활 유형",130,1215);
+  const name=`한방유형_${T.name}.png`;
+  c.toBlob(async blob=>{
+    if(!blob){$("toast").textContent="이미지를 만들지 못했어요. 화면을 캡처해 주세요";return;}
+    const file=new File([blob],name,{type:"image/png"});
+    try{
+      if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"나의 한방 건강 유형"});return;}
+    }catch(e){if(e&&e.name==="AbortError")return;}
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+    $("toast").textContent="이미지를 저장했어요. 스토리나 스레드에 올려 보세요";
+  },"image/png");
+}
+
+function start(){idx=0;answers=[];try{history.replaceState(null,"",location.pathname)}catch(e){}show("quiz");renderQ();window.scrollTo({top:0});}
+$("startBtn").onclick=start;
+$("homeBtn").onclick=goHome;
+$("backBtn").onclick=()=>{if(idx>0){idx--;renderQ();}};
+
+function route(){
+  const k=location.hash.replace("#","");
+  if(TYPES[k]) renderResult(k,undefined,undefined,false);
+  else if(!k && !$("result").hidden) show("intro");
+}
+window.addEventListener("hashchange",route);
+route();
+</script>
+</body>
+</html>
